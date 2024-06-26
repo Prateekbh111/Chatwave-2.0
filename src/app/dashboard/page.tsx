@@ -6,6 +6,8 @@ import { notFound } from "next/navigation";
 export default async function Page() {
 	const session = await getServerSession(authOptions);
 	if (!session) notFound();
+
+	// keepTheme();
 	return (
 		<div className="flex flex-col flex-1">
 			<header className="bg-foreground text-primary-foreground py-4 px-6 flex items-center justify-between">

@@ -1,6 +1,5 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-
 import Sidebar from "@/components/SideBar";
 import MessagingInterface from "@/components/MessagingInterface";
 import { getServerSession } from "next-auth";
@@ -38,7 +37,7 @@ export default async function Page({ params }: PageProps) {
 		<div className="flex flex-col flex-1">
 			<header className="bg-foreground text-primary-foreground py-4 px-6 flex items-center justify-between">
 				<Sidebar session={session} />
-				<div className="flex items-center justify-center gap-3">
+				<div className="flex md:flex-row flex-col items-center justify-center gap-3">
 					<Avatar className="w-8 h-8">
 						<AvatarImage src="/" />
 						<AvatarFallback className="text-foreground">
