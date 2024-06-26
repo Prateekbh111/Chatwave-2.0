@@ -51,7 +51,7 @@ export async function POST(req: Request, res: Response) {
 			timestamp: timestamp,
 		};
 
-		pusherServer.trigger(
+		await pusherServer.trigger(
 			toPusherKey(`chat:${chatId}:messages`),
 			"messages",
 			messageData

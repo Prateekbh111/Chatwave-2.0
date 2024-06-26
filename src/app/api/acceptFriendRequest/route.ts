@@ -49,7 +49,7 @@ export async function POST(req: Request, res: Response) {
 			);
 		}
 
-		pusherServer.trigger(
+		await pusherServer.trigger(
 			toPusherKey(`user:${session.user.id}:friends`),
 			"friends",
 			{
@@ -59,12 +59,16 @@ export async function POST(req: Request, res: Response) {
 				image: requestUserDataJson?.image!,
 			}
 		);
-		pusherServer.trigger(toPusherKey(`user:${requestId}:friends`), "friends", {
-			id: session.user.id,
-			name: session.user.name,
-			email: session.user.email,
-			image: session.user.image,
-		});
+		await pusherServer.trigger(
+			toPusherKey(`user:${requestId}:friends`),
+			"friends",
+			{
+				id: session.user.id,
+				name: session.user.name,
+				email: session.user.email,
+				image: session.user.image,
+			}
+		);
 
 		await redisClient.sadd(`user:${session.user.id}:friends`, {
 			id: requestUserDataJson?.id!,
