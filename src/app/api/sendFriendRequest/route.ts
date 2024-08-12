@@ -29,14 +29,6 @@ export async function POST(req: Request, res: Response) {
 			{ status: 400 }
 		);
 	}
-
-	const userData: FriendRequest = {
-		senderId: session.user.id!,
-		senderName: session.user.name!,
-		senderEmail: session.user.email!,
-		senderImage: session.user.image!,
-	};
-
 	const userToAdd = await prisma.user.findUnique({
 		where: {
 			email: friendEmail,
