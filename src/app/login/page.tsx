@@ -2,10 +2,16 @@
 import { Button } from "@/components/ui/button";
 import { Chrome, Waves } from "lucide-react";
 import { signIn } from "next-auth/react";
+import { motion } from "framer-motion";
 
 export default function Page() {
 	return (
-		<div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br dark:from-black dark:to-neutral-950 from-white to-neutral-200">
+		<motion.div
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			transition={{ duration: 0.8, ease: "easeInOut" }}
+			className="overflow-y-hidden flex flex-col items-center justify-center min-h-screen bg-gradient-to-br dark:from-black dark:to-neutral-950 from-white to-neutral-200"
+		>
 			<header className="mb-8 text-center">
 				<div className="flex items-center justify-center">
 					<Waves className="h-10 w-10 mr-2 dark:text-white text-black" />
@@ -45,6 +51,6 @@ export default function Page() {
 					</Button>
 				</div>
 			</div>
-		</div>
+		</motion.div>
 	);
 }

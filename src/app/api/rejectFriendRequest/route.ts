@@ -1,10 +1,11 @@
 import { redisClient } from "@/lib/redis";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
+import prisma from "@/lib/prisma";
 
 export async function POST(req: Request, res: Response) {
 	const session = await getServerSession(authOptions);
-	const { requestId } = await req.json();
+	const requestUserData: FriendRequest = await req.json();
 
 	if (!session?.user) {
 		return Response.json(
@@ -14,27 +15,26 @@ export async function POST(req: Request, res: Response) {
 	}
 
 	try {
-		const requestUserDatajson = await redisClient.get<User>(
-			`user:${requestId}`
-		);
-		const requestUserData: FriendRequest = {
-			senderId: requestUserDatajson!.id,
-			senderName: requestUserDatajson!.name,
-			senderEmail: requestUserDatajson!.email,
-			senderImage: requestUserDatajson!.image,
-		};
+		const hasFriendRequest = await prisma.friendRequest.findFirst({
+			where: {
+				receiverId: session.user.id!,
+				senderId: requestUserData.id!,
+			},
+		});
 
-		console.log(session.user.id);
-		const numberOfEntryRemoved = await redisClient.srem(
-			`user:${session.user.id}:friendRequests`,
-			requestUserData
-		);
-		if (numberOfEntryRemoved == 0) {
+		if (!hasFriendRequest) {
 			return Response.json(
-				{ success: false, message: "Internal Server Error" },
-				{ status: 500 }
+				{ success: false, message: "You don't have friend request" },
+				{ status: 402 }
 			);
 		}
+
+		await prisma.friendRequest.delete({
+			where: {
+				id: hasFriendRequest?.id,
+			},
+		});
+
 		return Response.json(
 			{ success: true, message: "Friend Request Denied" },
 			{ status: 200 }

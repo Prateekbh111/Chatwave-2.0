@@ -62,11 +62,11 @@ export default function FriendsList({
 								className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
 									activeUserId === user.id && "bg-accent text-accent-foreground"
 								}`}
-								onClick={() => handleChatSelect(user.id)}
+								onClick={() => handleChatSelect(user.id!)}
 							>
 								<Avatar className="w-6 h-6">
 									<AvatarImage src="/" />
-									<AvatarFallback>{user.name[0].toUpperCase()}</AvatarFallback>
+									<AvatarFallback>{user.name![0].toUpperCase()}</AvatarFallback>
 								</Avatar>
 								{user.name}
 							</li>

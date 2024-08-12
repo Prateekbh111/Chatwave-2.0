@@ -26,6 +26,7 @@ export default function MessagingInterface({
 	const [messages, setMessages] = useState<Message[]>(prevMessages);
 	const [inputMessage, setInputMessage] = useState("");
 
+	console.log(messages);
 	useEffect(() => {
 		if (chatRef.current) {
 			chatRef.current.scrollTop = chatRef.current.scrollHeight;
@@ -55,15 +56,31 @@ export default function MessagingInterface({
 
 		try {
 			console.log("Sending message");
-			setMessages([
-				...messages,
-				{
-					id: (messages.length + 1).toString(),
-					senderId: session?.user.id!,
-					message: inputMessage,
-					timestamp: Date.now(),
-				},
-			]);
+			if (messages) {
+				setMessages([
+					...messages,
+					{
+						id: (messages.length + 1).toString(),
+						senderId: session?.user.id!,
+						content: inputMessage,
+						timestamp: new Date(),
+						receiverId: anotherUser.id, // Add receiverId
+						chatId: chatId, // Add chatId
+					},
+				]);
+			} else {
+				setMessages([
+					{
+						id: (1).toString(),
+						senderId: session?.user.id!,
+						content: inputMessage,
+						timestamp: new Date(),
+						receiverId: anotherUser.id, // Add receiverId
+						chatId: chatId, // Add chatId
+					},
+				]);
+			}
+
 			setInputMessage("");
 
 			await axios.post<ApiResponse>("/api/sendMessage", {
@@ -79,38 +96,43 @@ export default function MessagingInterface({
 	return (
 		<>
 			<div className="flex-1 overflow-auto p-6 space-y-4" ref={chatRef}>
-				{messages.map((message) => (
-					<div
-						key={message.id}
-						className={`flex items-start gap-4 mb-1 ${
-							message.senderId === session.user.id && "flex-row-reverse"
-						}`}
-					>
-						<Avatar className="w-8 h-8">
-							<AvatarImage src="/" />
-							<AvatarFallback>
-								{message.senderId === session.user.id
-									? session.user.name![0].toUpperCase()
-									: anotherUser.name![0].toUpperCase()}
-							</AvatarFallback>
-						</Avatar>
+				{messages &&
+					messages.map((message) => (
 						<div
-							className={`rounded-lg p-4 max-w-[70%] ${
-								message.senderId === session.user.id
-									? "bg-foreground text-primary-foreground"
-									: "bg-muted"
+							key={message.id}
+							className={`flex items-start gap-4 mb-1 ${
+								message.senderId === session.user.id && "flex-row-reverse"
 							}`}
 						>
-							<p>{message.message}</p>
-							<div className="text-xs text-muted-foreground mt-2">
-								{new Date(message.timestamp).toLocaleTimeString([], {
-									hour: "numeric",
-									minute: "2-digit",
-								})}
+							<Avatar className="w-8 h-8">
+								<AvatarImage src="/" />
+								<AvatarFallback>
+									{message.senderId === session.user.id
+										? session.user.name![0].toUpperCase()
+										: anotherUser.name![0].toUpperCase()}
+								</AvatarFallback>
+							</Avatar>
+							<div
+								className={`rounded-lg p-4 max-w-[70%] ${
+									message.senderId === session.user.id
+										? "bg-foreground text-primary-foreground"
+										: "bg-muted"
+								}`}
+							>
+								<p>{message.content}</p>
+								<div className="text-xs text-muted-foreground mt-2">
+									{new Date(message.timestamp!).toLocaleString("en-US", {
+										year: "numeric",
+										month: "2-digit",
+										day: "2-digit",
+										hour: "2-digit",
+										minute: "2-digit",
+										hour12: true,
+									})}
+								</div>
 							</div>
 						</div>
-					</div>
-				))}
+					))}
 			</div>
 
 			<div className="bg-background border-t border-border px-6 py-4 flex items-center gap-2">

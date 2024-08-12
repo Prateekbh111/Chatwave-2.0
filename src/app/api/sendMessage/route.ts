@@ -4,6 +4,7 @@ import { redisClient } from "@/lib/redis";
 import { nanoid } from "nanoid";
 import { pusherServer } from "@/lib/pusher";
 import { toPusherKey } from "@/lib/utils";
+import prisma from "@/lib/prisma";
 
 export async function POST(req: Request, res: Response) {
 	try {
@@ -23,39 +24,70 @@ export async function POST(req: Request, res: Response) {
 
 		const otherUserId = userId === userId1 ? userId2 : userId1;
 
-		const otherUserDataRaw: any = await redisClient.get(`user:${otherUserId}`);
-		const otherUserData = {
-			id: otherUserDataRaw.id,
-			name: otherUserDataRaw.name,
-			email: otherUserDataRaw.email,
-			image: otherUserDataRaw.image,
-		};
-		console.log(userId);
-		console.log(otherUserData);
-		const isFriends = await redisClient.sismember(
-			`user:${userId}:friends`,
-			otherUserData
-		);
-		console.log(isFriends);
+		// const otherUserData = await prisma.user.findUnique({
+		// 	where: {
+		// 		id: otherUserId,
+		// 	},
+		// });
+		const isFriends = await prisma.friends.findFirst({
+			where: {
+				friendOfId: userId,
+				friendId: otherUserId,
+			},
+		});
 		if (!isFriends) {
 			return Response.json(
 				{ success: false, message: "UNAUTHORIZED" },
 				{ status: 402 }
 			);
 		}
-		const timestamp = Date.now();
-		const messageData = {
-			id: nanoid(),
-			senderId: userId,
-			message,
-			timestamp: timestamp,
-		};
+
+		let prevChat = await prisma.chat.findFirst({
+			where: {
+				user1Id: userId1,
+				user2Id: userId2,
+			},
+		});
+
+		if (!prevChat) {
+			prevChat = await prisma.chat.create({
+				data: {
+					user1Id: userId1,
+					user2Id: userId2,
+				},
+			});
+		}
+
+		await prisma.message.create({
+			data: {
+				chatId: prevChat.id,
+				content: message,
+				senderId: userId,
+				receiverId: otherUserId,
+				timestamp: new Date(),
+			},
+		});
 
 		await pusherServer.trigger(
 			toPusherKey(`chat:${chatId}:messages`),
 			"messages",
-			messageData
+			{
+				chatId: prevChat.id,
+				content: message,
+				senderId: userId,
+				receiverId: otherUserId,
+				timestamp: new Date(),
+			}
 		);
+		return Response.json({ success: true, message: "Sent" }, { status: 200 });
+		const timestamp = Date.now();
+		const messageData = {
+			senderId: userId,
+			receiverId: otherUserId,
+			content: message,
+			timestamp: new Date(),
+			chatId: chatId,
+		};
 
 		await redisClient.zadd(`chat:${chatId}:messages`, {
 			score: timestamp,

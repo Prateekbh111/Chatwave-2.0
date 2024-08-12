@@ -3,6 +3,7 @@ import { authOptions } from "../auth/[...nextauth]/options";
 import { fetchRedis, redisClient } from "@/lib/redis";
 import { pusherServer } from "@/lib/pusher";
 import { toPusherKey } from "@/lib/utils";
+import prisma from "@/lib/prisma";
 
 export async function POST(req: Request, res: Response) {
 	const { friendEmail } = await req.json();
@@ -20,6 +21,8 @@ export async function POST(req: Request, res: Response) {
 	console.log("user Email: ", userEmail);
 	console.log("friend Email", friendEmail);
 
+	console.log("userId: ", session.user.id);
+
 	if (userEmail === friendEmail) {
 		return Response.json(
 			{ success: false, message: "Can't send request to yourself." },
@@ -34,7 +37,18 @@ export async function POST(req: Request, res: Response) {
 		senderImage: session.user.image!,
 	};
 
-	const idToAdd = await redisClient.get<string>(`user:email:${friendEmail}`);
+	const userToAdd = await prisma.user.findUnique({
+		where: {
+			email: friendEmail,
+		},
+		select: {
+			id: true,
+		},
+	});
+
+	const idToAdd = userToAdd?.id;
+
+	console.log("idToAdd: ", idToAdd);
 	if (!idToAdd) {
 		return Response.json(
 			{ success: false, message: "User with this email does not exits." },
@@ -42,10 +56,14 @@ export async function POST(req: Request, res: Response) {
 		);
 	}
 
-	const isAlreadyFriendRequested = await redisClient.sismember(
-		`user:${idToAdd}:friendRequests`,
-		userData
-	);
+	const isAlreadyFriendRequested = await prisma.friendRequest.findFirst({
+		where: {
+			senderId: session.user.id,
+			receiverId: idToAdd,
+		},
+	});
+
+	console.log("isAlreadyFriendRequested: ", isAlreadyFriendRequested);
 	if (isAlreadyFriendRequested) {
 		return Response.json(
 			{ success: false, message: "Already Requested." },
@@ -53,10 +71,14 @@ export async function POST(req: Request, res: Response) {
 		);
 	}
 
-	const isAlreadyFriend = await redisClient.sismember(
-		`user:${idToAdd}:friends`,
-		userData
-	);
+	const isAlreadyFriend = await prisma.friends.findFirst({
+		where: {
+			friendOfId: session.user.id,
+			friendId: idToAdd,
+		},
+	});
+
+	console.log("isAlreadyFriend: ", isAlreadyFriend);
 	if (isAlreadyFriend) {
 		return Response.json(
 			{ success: false, message: "Already Friends." },
@@ -65,13 +87,18 @@ export async function POST(req: Request, res: Response) {
 	}
 
 	//send friend request
-	await pusherServer.trigger(
-		toPusherKey(`user:${idToAdd}:friendRequests`),
-		"friendRequests",
-		userData
-	);
+	// await pusherServer.trigger(
+	// 	toPusherKey(`user:${idToAdd}:friendRequests`),
+	// 	"friendRequests",
+	// 	userData
+	// );
 
-	await redisClient.sadd(`user:${idToAdd}:friendRequests`, userData);
+	await prisma.friendRequest.create({
+		data: {
+			senderId: session.user.id,
+			receiverId: idToAdd,
+		},
+	});
 
 	return Response.json(
 		{

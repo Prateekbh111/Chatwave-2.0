@@ -1,26 +1,28 @@
 interface User {
-	name: string;
-	email: string;
-	image: string;
-	id: string;
+	id: string | null;
+	name: string | null;
+	email: string | null;
+	image: string | null;
 }
 
 interface FriendRequest {
-	senderId: string;
-	senderName: string;
-	senderEmail: string;
-	senderImage: string;
+	id: string | null;
+	name?: string | null;
+	email?: string | null;
+	image?: string | null;
 }
 interface Friend {
-	id: string;
-	name: string;
-	email: string;
-	image: string;
+	id: string | null;
+	name: string | null;
+	email: string | null;
+	image: string | null;
 }
 
 interface Message {
 	id: string;
-	senderId: string;
-	message: string;
-	timestamp: number;
+	senderId: string | null;
+	receiverId: string | null;
+	content: string | null;
+	timestamp: Date | null;
+	chatId: string | null;
 }

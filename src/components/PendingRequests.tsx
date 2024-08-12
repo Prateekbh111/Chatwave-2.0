@@ -1,5 +1,5 @@
 "use client";
-import { Check, Clock2, LoaderCircle, X } from "lucide-react";
+import { Check, Clock2, FireExtinguisher, LoaderCircle, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "./ui/drawer";
@@ -11,6 +11,7 @@ import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/types/ApiResponse";
 import { pusherClient } from "@/lib/pusher";
 import { toPusherKey } from "@/lib/utils";
+import { RequestCard } from "./RequestCard";
 
 export default function PendingRequests({
 	friendRequests,
@@ -19,11 +20,8 @@ export default function PendingRequests({
 	friendRequests: FriendRequest[];
 	session: Session;
 }) {
-	const { toast } = useToast();
 	const [UserFriendRequests, setUserFriendRequests] =
 		useState<FriendRequest[]>(friendRequests);
-	const [isDenying, setIsDenying] = useState<boolean>(false);
-	const [isAccepting, setIsAccepting] = useState<boolean>(false);
 
 	useEffect(() => {
 		pusherClient.subscribe(
@@ -48,63 +46,6 @@ export default function PendingRequests({
 			pusherClient.unbind("friendRequests");
 		};
 	}, []);
-
-	const handleAcceptRequest = async (requestId: string) => {
-		try {
-			setIsAccepting(true);
-
-			const response = await axios.post<ApiResponse>(
-				"/api/acceptFriendRequest",
-				{
-					requestId,
-				}
-			);
-
-			toast({
-				title: "Success",
-				description: `${response.data.message}`,
-			});
-			setUserFriendRequests((prevRequests) =>
-				prevRequests.filter((request) => request.senderId !== requestId)
-			);
-		} catch (error) {
-			const axiosError = error as AxiosError<ApiResponse>;
-			toast({
-				title: "Uh oh! Something went wrong.",
-				description: "There was a problem with your request.",
-			});
-		} finally {
-			setIsAccepting(false);
-		}
-	};
-
-	const handleRejectRequest = async (requestId: string) => {
-		try {
-			setIsDenying(true);
-
-			const response = await axios.post<ApiResponse>(
-				"/api/rejectFriendRequest",
-				{
-					requestId,
-				}
-			);
-			toast({
-				title: "Success",
-				description: `${response.data.message}`,
-			});
-			setUserFriendRequests((prevRequests) =>
-				prevRequests.filter((request) => request.senderId !== requestId)
-			);
-		} catch (error) {
-			const axiosError = error as AxiosError<ApiResponse>;
-			toast({
-				title: "Uh oh! Something went wrong.",
-				description: "There was a problem with your request.",
-			});
-		} finally {
-			setIsDenying(false);
-		}
-	};
 
 	return (
 		<Drawer>
@@ -131,49 +72,11 @@ export default function PendingRequests({
 						<ScrollArea className="h-72 max-w-xl w-full ">
 							<ul className="w-full  flex flex-col space-y-1.5 p-6">
 								{UserFriendRequests.map((friendRequest) => (
-									<li
-										key={friendRequest.senderId}
-										className="md:flex justify-between items-center p-4 space-y-2 bg-card rounded-lg border "
-									>
-										<div>
-											<p className="text-2xl font-semibold leading-none tracking-tight">
-												{friendRequest.senderName}
-											</p>
-											<p className="text-sm text-muted-foreground">
-												{friendRequest.senderEmail}
-											</p>
-										</div>
-										<div className="flex space-x-4">
-											<Button
-												onClick={() =>
-													handleAcceptRequest(friendRequest.senderId)
-												}
-											>
-												{isAccepting ? (
-													<>
-														<LoaderCircle className="mr-2 h-4 w-4 animate-spin" />{" "}
-														Accepting...
-													</>
-												) : (
-													<Check />
-												)}
-											</Button>
-											<Button
-												onClick={() =>
-													handleRejectRequest(friendRequest.senderId)
-												}
-											>
-												{isDenying ? (
-													<>
-														<LoaderCircle className="mr-2 h-4 w-4 animate-spin" />{" "}
-														Rejecting...
-													</>
-												) : (
-													<X />
-												)}
-											</Button>
-										</div>
-									</li>
+									<RequestCard
+										friendRequest={friendRequest}
+										setUserFriendRequests={setUserFriendRequests}
+										key={friendRequest.id}
+									/>
 								))}
 							</ul>
 						</ScrollArea>

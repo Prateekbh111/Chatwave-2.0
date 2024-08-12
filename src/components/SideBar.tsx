@@ -16,15 +16,43 @@ import {
 } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { Session } from "next-auth";
+import prisma from "@/lib/prisma";
 
 export default async function Sidebar({ session }: { session: Session }) {
-	const friendRequests = await redisClient.smembers<FriendRequest[]>(
-		`user:${session?.user.id}:friendRequests`
+	const allFriendRequests = await prisma.friendRequest.findMany({
+		where: {
+			receiverId: session.user.id,
+		},
+		select: {
+			sender: {
+				select: {
+					id: true,
+					name: true,
+					email: true,
+					image: true,
+				},
+			},
+		},
+	});
+	const friendRequests: FriendRequest[] = allFriendRequests.map(
+		(request) => request.sender
 	);
-
-	const friends: Friend[] = await redisClient.smembers(
-		`user:${session!.user.id}:friends`
-	);
+	const allFriends = await prisma.friends.findMany({
+		where: {
+			friendOfId: session.user.id,
+		},
+		select: {
+			friend: {
+				select: {
+					id: true,
+					name: true,
+					image: true,
+					email: true,
+				},
+			},
+		},
+	});
+	const friends: Friend[] = allFriends.map((request) => request.friend);
 
 	return (
 		<Sheet>

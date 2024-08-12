@@ -5,6 +5,7 @@ import MessagingInterface from "@/components/MessagingInterface";
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
 import { redisClient } from "@/lib/redis";
+import prisma from "@/lib/prisma";
 
 interface PageProps {
 	params: {
@@ -26,12 +27,26 @@ export default async function Page({ params }: PageProps) {
 	if (user.id !== userId1 && user.id !== userId2) return notFound();
 
 	const anotherUserId = user.id === userId1 ? userId2 : userId1;
-	const anotherUser: User = (await redisClient.get(`user:${anotherUserId}`))!;
-	const prevMessages: Message[] = await redisClient.zrange(
-		`chat:${chatId}:messages`,
-		0,
-		-1
-	);
+	const anotherUser: User = (await prisma.user.findUnique({
+		where: {
+			id: anotherUserId,
+		},
+	}))!;
+
+	//TODO: to find the chat
+	const chat = await prisma.chat.findFirst({
+		where: {
+			user1Id: userId1,
+			user2Id: userId2,
+		},
+		select: {
+			messages: true,
+		},
+	});
+
+	console.log(chat);
+
+	const prevMessages: Message[] | null = chat?.messages!;
 
 	return (
 		<div className="flex flex-col flex-1">
@@ -41,7 +56,7 @@ export default async function Page({ params }: PageProps) {
 					<Avatar className="w-8 h-8">
 						<AvatarImage src="/" />
 						<AvatarFallback className="text-foreground">
-							{anotherUser.name[0].toUpperCase()}
+							{anotherUser?.name![0].toUpperCase()}
 						</AvatarFallback>
 					</Avatar>
 					<div>
