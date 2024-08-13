@@ -13,13 +13,9 @@ export const authOptions: AuthOptions = {
 			clientId: process.env.GOOGLE_CLIENT_ID!,
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
 			profile(profile) {
-				console.log(profile);
 				return {
 					id: profile.sub,
-					//TODO: figure out the last name coming as undefined
-					name: `${profile.given_name} ${
-						profile.family_name ? profile.family_name : ""
-					}`,
+					name: profile.name,
 					email: profile.email,
 					image: profile.picture,
 				};
