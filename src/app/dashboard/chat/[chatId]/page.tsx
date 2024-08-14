@@ -4,8 +4,9 @@ import Sidebar from "@/components/SideBar";
 import MessagingInterface from "@/components/MessagingInterface";
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
-import { redisClient } from "@/lib/redis";
 import prisma from "@/lib/prisma";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 interface PageProps {
 	params: {
@@ -14,10 +15,6 @@ interface PageProps {
 }
 
 export default async function Page({ params }: PageProps) {
-	// const promise = await new Promise((resolveInner) => {
-	// 	setTimeout(resolveInner, 2000);
-	// });
-
 	const { chatId } = params;
 	const session = await getServerSession(authOptions);
 	if (!session) return notFound();
@@ -33,7 +30,6 @@ export default async function Page({ params }: PageProps) {
 		},
 	}))!;
 
-	//TODO: to find the chat
 	const chat = await prisma.chat.findFirst({
 		where: {
 			user1Id: userId1,
@@ -45,8 +41,6 @@ export default async function Page({ params }: PageProps) {
 	});
 
 	console.log(chat);
-
-	const prevMessages: Message[] | null = chat?.messages!;
 
 	return (
 		<div className="flex flex-col flex-1">
@@ -63,12 +57,16 @@ export default async function Page({ params }: PageProps) {
 						<div className="font-medium">{anotherUser?.name!}</div>
 					</div>
 				</div>
-				<div></div>
+				<div>
+					<Button className="hover:bg-red-500 hover:text-white transition-all ease-in-out">
+						<Trash2 />
+					</Button>
+				</div>
 			</header>
 			<MessagingInterface
 				session={session}
 				chatId={chatId}
-				prevMessages={prevMessages}
+				prevMessages={chat?.messages ? chat?.messages : []}
 				anotherUser={anotherUser}
 			/>
 		</div>

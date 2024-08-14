@@ -1,19 +1,18 @@
 "use client";
-import { LoaderCircle, LoaderIcon, PlusIcon } from "lucide-react";
+import { LoaderCircle, PlusIcon } from "lucide-react";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "./ui/drawer";
 import { Button } from "./ui/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "./ui/card";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { useToast } from "./ui/use-toast";
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/types/ApiResponse";
 

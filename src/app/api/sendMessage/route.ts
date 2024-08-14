@@ -1,7 +1,5 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
-import { redisClient } from "@/lib/redis";
-import { nanoid } from "nanoid";
 import { pusherServer } from "@/lib/pusher";
 import { toPusherKey } from "@/lib/utils";
 import prisma from "@/lib/prisma";
@@ -24,11 +22,6 @@ export async function POST(req: Request, res: Response) {
 
 		const otherUserId = userId === userId1 ? userId2 : userId1;
 
-		// const otherUserData = await prisma.user.findUnique({
-		// 	where: {
-		// 		id: otherUserId,
-		// 	},
-		// });
 		const isFriends = await prisma.friends.findFirst({
 			where: {
 				friendOfId: userId,
@@ -79,21 +72,6 @@ export async function POST(req: Request, res: Response) {
 				timestamp: new Date(),
 			}
 		);
-		return Response.json({ success: true, message: "Sent" }, { status: 200 });
-		const timestamp = Date.now();
-		const messageData = {
-			senderId: userId,
-			receiverId: otherUserId,
-			content: message,
-			timestamp: new Date(),
-			chatId: chatId,
-		};
-
-		await redisClient.zadd(`chat:${chatId}:messages`, {
-			score: timestamp,
-			member: JSON.stringify(messageData),
-		});
-
 		return Response.json({ success: true, message: "Sent" }, { status: 200 });
 	} catch (error) {
 		console.log(error);

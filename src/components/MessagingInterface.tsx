@@ -26,10 +26,12 @@ export default function MessagingInterface({
 	const [messages, setMessages] = useState<Message[]>(prevMessages);
 	const [inputMessage, setInputMessage] = useState("");
 
-	console.log(messages);
 	useEffect(() => {
 		if (chatRef.current) {
-			chatRef.current.scrollTop = chatRef.current.scrollHeight;
+			chatRef.current.scrollTo({
+				top: chatRef.current.scrollHeight,
+				behavior: "smooth",
+			});
 		}
 	}, [messages]);
 
@@ -38,7 +40,8 @@ export default function MessagingInterface({
 
 		const messageHandler = (data: Message) => {
 			if (data.senderId !== session.user.id) {
-				setMessages((prevMessage) => [...prevMessage, data]);
+				if (messages) setMessages((prevMessage) => [...prevMessage, data]);
+				else setMessages([data]);
 			}
 		};
 
@@ -95,7 +98,10 @@ export default function MessagingInterface({
 
 	return (
 		<>
-			<div className="flex-1 overflow-auto p-6 space-y-4" ref={chatRef}>
+			<div
+				className="flex-1 overflow-auto p-6 space-y-4 w-screen"
+				ref={chatRef}
+			>
 				{messages &&
 					messages.map((message) => (
 						<div
@@ -113,13 +119,13 @@ export default function MessagingInterface({
 								</AvatarFallback>
 							</Avatar>
 							<div
-								className={`rounded-lg p-4 max-w-[70%] ${
+								className={`rounded-lg p-4 max-w-[60%] ${
 									message.senderId === session.user.id
 										? "bg-foreground text-primary-foreground"
 										: "bg-muted"
 								}`}
 							>
-								<p>{message.content}</p>
+								<p className="break-words">{message.content}</p>
 								<div className="text-xs text-muted-foreground mt-2">
 									{new Date(message.timestamp!).toLocaleString("en-US", {
 										year: "numeric",

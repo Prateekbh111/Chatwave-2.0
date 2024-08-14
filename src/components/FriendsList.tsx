@@ -2,7 +2,6 @@
 import { Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ScrollArea } from "./ui/scroll-area";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Session } from "next-auth";
@@ -65,7 +64,7 @@ export default function FriendsList({
 								onClick={() => handleChatSelect(user.id!)}
 							>
 								<Avatar className="w-6 h-6">
-									<AvatarImage src="/" />
+									<AvatarImage src={user.image!} />
 									<AvatarFallback>{user.name![0].toUpperCase()}</AvatarFallback>
 								</Avatar>
 								{user.name}

@@ -1,14 +1,9 @@
 "use client";
-import { Check, Clock2, FireExtinguisher, LoaderCircle, X } from "lucide-react";
-import Link from "next/link";
+import { Clock2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "./ui/drawer";
-import { Button } from "./ui/button";
 import { Session } from "next-auth";
 import { ScrollArea } from "./ui/scroll-area";
-import { useToast } from "./ui/use-toast";
-import axios, { AxiosError } from "axios";
-import { ApiResponse } from "@/types/ApiResponse";
 import { pusherClient } from "@/lib/pusher";
 import { toPusherKey } from "@/lib/utils";
 import { RequestCard } from "./RequestCard";

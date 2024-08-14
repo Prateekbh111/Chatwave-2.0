@@ -1,16 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import LogoutButton from "./LogoutButton";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import PendingRequests from "./PendingRequests";
 import AddFriend from "./AddFriend";
-import { redisClient } from "@/lib/redis";
 import FriendsList from "./FriendsList";
 import {
 	Sheet,
 	SheetContent,
-	SheetDescription,
-	SheetHeader,
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet";

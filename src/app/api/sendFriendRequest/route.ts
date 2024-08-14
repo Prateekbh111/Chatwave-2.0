@@ -1,9 +1,8 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
-import { fetchRedis, redisClient } from "@/lib/redis";
+import prisma from "@/lib/prisma";
 import { pusherServer } from "@/lib/pusher";
 import { toPusherKey } from "@/lib/utils";
-import prisma from "@/lib/prisma";
 
 export async function POST(req: Request, res: Response) {
 	const { friendEmail } = await req.json();
@@ -79,11 +78,16 @@ export async function POST(req: Request, res: Response) {
 	}
 
 	//send friend request
-	// await pusherServer.trigger(
-	// 	toPusherKey(`user:${idToAdd}:friendRequests`),
-	// 	"friendRequests",
-	// 	userData
-	// );
+	await pusherServer.trigger(
+		toPusherKey(`user:${idToAdd}:friendRequests`),
+		"friendRequests",
+		{
+			id: session.user.id,
+			name: session.user.name,
+			email: session.user.email,
+			image: session.user.image,
+		}
+	);
 
 	await prisma.friendRequest.create({
 		data: {

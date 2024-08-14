@@ -1,4 +1,3 @@
-import { redisClient } from "@/lib/redis";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 import prisma from "@/lib/prisma";
