@@ -5,8 +5,7 @@ import MessagingInterface from "@/components/MessagingInterface";
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import FriendDeleteButton from "@/components/FriendDeleteButton";
 
 interface PageProps {
 	params: {
@@ -40,8 +39,6 @@ export default async function Page({ params }: PageProps) {
 		},
 	});
 
-	console.log(chat);
-
 	return (
 		<div className="flex flex-col flex-1">
 			<header className="bg-foreground text-primary-foreground py-4 px-6 flex items-center justify-between">
@@ -57,11 +54,7 @@ export default async function Page({ params }: PageProps) {
 						<div className="font-medium">{anotherUser?.name!}</div>
 					</div>
 				</div>
-				<div>
-					<Button className="hover:bg-red-500 hover:text-white transition-all ease-in-out">
-						<Trash2 />
-					</Button>
-				</div>
+				<div>{/* <FriendDeleteButton id={anotherUserId} /> */}</div>
 			</header>
 			<MessagingInterface
 				session={session}

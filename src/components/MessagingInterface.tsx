@@ -58,7 +58,6 @@ export default function MessagingInterface({
 		if (inputMessage.trim() === "") return;
 
 		try {
-			console.log("Sending message");
 			if (messages) {
 				setMessages([
 					...messages,
@@ -102,7 +101,7 @@ export default function MessagingInterface({
 				className="flex-1 overflow-auto p-6 space-y-4 w-screen"
 				ref={chatRef}
 			>
-				{messages &&
+				{messages.length > 0 ? (
 					messages.map((message) => (
 						<div
 							key={message.id}
@@ -138,7 +137,14 @@ export default function MessagingInterface({
 								</div>
 							</div>
 						</div>
-					))}
+					))
+				) : (
+					<div className="w-full h-full flex justify-center items-center">
+						<h1 className="text-3xl font-bold text-black dark:text-white">
+							Start with a wave of coversation
+						</h1>
+					</div>
+				)}
 			</div>
 
 			<div className="bg-background border-t border-border px-6 py-4 flex items-center gap-2">
