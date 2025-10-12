@@ -2,12 +2,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 import prisma from "@/lib/prisma";
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request) {
 	const session = await getServerSession(authOptions);
 	const { id: friendIdToBeDeleted } = await req.json();
 
 	try {
-		console.log(friendIdToBeDeleted);
 		const areFriends = await prisma.friends.findMany({
 			where: {
 				OR: [

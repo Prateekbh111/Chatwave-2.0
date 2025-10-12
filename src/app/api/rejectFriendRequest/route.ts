@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
 import prisma from "@/lib/prisma";
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request) {
 	const session = await getServerSession(authOptions);
 	const requestUserData: FriendRequest = await req.json();
 

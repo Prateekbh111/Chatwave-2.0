@@ -24,8 +24,6 @@ export default function PendingRequests({
 		);
 
 		const friendRequestHandler = (data: FriendRequest) => {
-			console.log("new friend request");
-			console.log(data);
 			setUserFriendRequests((prevFriendRequest) => [
 				...prevFriendRequest,
 				data,

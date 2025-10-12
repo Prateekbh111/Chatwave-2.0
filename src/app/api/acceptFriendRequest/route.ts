@@ -4,7 +4,7 @@ import { pusherServer } from "@/lib/pusher";
 import { toPusherKey } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: Request) {
 	const session = await getServerSession(authOptions);
 	const requestUserData: FriendRequest = await req.json();
 
@@ -43,6 +43,8 @@ export async function POST(req: Request, res: Response) {
 			);
 		}
 
+		console.log("requestUserData: ", requestUserData);
+		console.log("session.user: ", session.user);
 		await pusherServer.trigger(
 			toPusherKey(`user:${session.user.id}:friends`),
 			"friends",
@@ -85,5 +87,9 @@ export async function POST(req: Request, res: Response) {
 		);
 	} catch (error) {
 		console.log(error);
+		return Response.json(
+			{ success: false, message: "Internal server error" },
+			{ status: 500 }
+		);
 	}
 }
